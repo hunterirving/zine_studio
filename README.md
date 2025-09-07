@@ -25,7 +25,7 @@ Once you've printed the page, follow this assembly guide from <a href="https://v
 # In Stock
 1. <a href="https://hunterirving.github.io/zine.html/zines/zine.html/">zine.html</a><img src="resources/readme_images/hot.gif" style="padding-left:10px; height: 26px;">
 > the literary classic that started a revolution in self-publishing.
-2. <a href="https://hunterirving.github.io/zines/hacksburg_gazette">the hacksburg gazette</a>
+2. <a href="https://hunterirving.github.io/zine.html/zines/hacksburg_gazette">the hacksburg gazette</a>
 > a promotional zine for Hacksburg, a makerspace in Blacksburg, VA.
 
 # Z.I.Y. (Zine it Yourself)
