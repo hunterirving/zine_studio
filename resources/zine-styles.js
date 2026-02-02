@@ -61,6 +61,7 @@ export const ZINE_FLIP_CSS = `
 		transform-origin: left center;
 		transform-style: preserve-3d;
 		transition: none;
+		will-change: transform;
 	}
 
 	/* When flipping, use high z-index so it's on top during animation */
@@ -76,6 +77,7 @@ export const ZINE_FLIP_CSS = `
 		height: 100%;
 		backface-visibility: hidden;
 		-webkit-backface-visibility: hidden;
+		transform: translateZ(0);
 	}
 
 	.zine-leaf-front {

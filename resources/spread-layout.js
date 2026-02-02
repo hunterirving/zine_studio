@@ -47,10 +47,9 @@ export function setupSpreadLayout(container, spread, doc, useFlipAnimation = fal
 // Navigate to a spread with optional flip animation
 export function navigateToSpread(container, spreadIndex, doc, useFlipAnimation = false, onComplete) {
 	if (useFlipAnimation && container.querySelector('.zine-book')) {
-		if (!getIsAnimating()) {
-			animatePageFlip(currentFlipSpread, spreadIndex, container, doc, onComplete);
-			currentFlipSpread = spreadIndex;
-		}
+		// Always call animatePageFlip - it now handles queueing internally
+		animatePageFlip(currentFlipSpread, spreadIndex, container, doc, onComplete);
+		currentFlipSpread = spreadIndex;
 	} else {
 		// Original non-animated behavior
 		const spread = SPREADS[spreadIndex];

@@ -1,6 +1,7 @@
 // Page flip animation state
 let isAnimating = false;
 let currentSpreadIndex = 0;
+let pendingFlipQueue = [];
 
 // Get animation state
 export function getIsAnimating() {
@@ -94,10 +95,20 @@ function updateLeafStates(spreadIndex, doc) {
 
 }
 
-// Animate page flip
-export function animatePageFlip(fromSpread, toSpread, container, doc, onComplete) {
-	if (isAnimating) return;
+// Process next queued flip if any
+function processNextFlip() {
+	if (pendingFlipQueue.length === 0) {
+		isAnimating = false;
+		return;
+	}
 
+	const nextFlip = pendingFlipQueue.shift();
+	// Use current spread index as fromSpread since we're now at a different position
+	executePageFlip(currentSpreadIndex, nextFlip.toSpread, nextFlip.container, nextFlip.doc, nextFlip.onComplete);
+}
+
+// Execute a single page flip (internal function)
+function executePageFlip(fromSpread, toSpread, container, doc, onComplete) {
 	isAnimating = true;
 	currentSpreadIndex = toSpread;
 
@@ -120,16 +131,25 @@ export function animatePageFlip(fromSpread, toSpread, container, doc, onComplete
 			});
 
 			// Clean up after animation
+			let cleanupCalled = false;
 			const cleanup = () => {
+				if (cleanupCalled) return;
+				cleanupCalled = true;
+
 				leafToFlip.dataset.state = 'open';
 				leafToFlip.style.transition = '';
 				// Set z-index for open state (lower than closed leaves)
 				leafToFlip.style.zIndex = String(fromSpread + 1);
-				isAnimating = false;
 				if (onComplete) onComplete();
 				leafToFlip.removeEventListener('transitionend', cleanup);
+				clearTimeout(timeoutId);
+				// Process next flip in queue
+				processNextFlip();
 			};
 			leafToFlip.addEventListener('transitionend', cleanup);
+
+			// Fallback timeout in case transitionend doesn't fire
+			const timeoutId = setTimeout(cleanup, 800);
 		}
 	} else {
 		// Flipping backward (left to right)
@@ -147,18 +167,44 @@ export function animatePageFlip(fromSpread, toSpread, container, doc, onComplete
 			});
 
 			// Clean up after animation
+			let cleanupCalled = false;
 			const cleanup = () => {
+				if (cleanupCalled) return;
+				cleanupCalled = true;
+
 				leafToFlip.dataset.state = 'closed';
 				leafToFlip.style.transition = '';
 				// Set z-index for closed state (higher than open leaves)
 				leafToFlip.style.zIndex = String(20 - toSpread);
-				isAnimating = false;
 				if (onComplete) onComplete();
 				leafToFlip.removeEventListener('transitionend', cleanup);
+				clearTimeout(timeoutId);
+				// Process next flip in queue
+				processNextFlip();
 			};
 			leafToFlip.addEventListener('transitionend', cleanup);
+
+			// Fallback timeout in case transitionend doesn't fire
+			const timeoutId = setTimeout(cleanup, 800);
 		}
 	}
+}
+
+// Animate page flip with input buffering
+export function animatePageFlip(fromSpread, toSpread, container, doc, onComplete) {
+	// If already animating, queue this flip request
+	if (isAnimating) {
+		// Check if there's already a queued flip to the same target - if so, skip this one
+		// This prevents the queue from growing unnecessarily when users spam the same direction
+		const lastQueued = pendingFlipQueue[pendingFlipQueue.length - 1];
+		if (!lastQueued || lastQueued.toSpread !== toSpread) {
+			pendingFlipQueue.push({ fromSpread, toSpread, container, doc, onComplete });
+		}
+		return;
+	}
+
+	// Start the flip immediately
+	executePageFlip(fromSpread, toSpread, container, doc, onComplete);
 }
 
 // Set current spread without animation (for initial load)
