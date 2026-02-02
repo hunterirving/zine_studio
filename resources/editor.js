@@ -21,7 +21,8 @@ function updatePreviewFromContent() {
 // Message handler for iframe communication
 window.addEventListener('message', function(event) {
 	if (event.data === 'toggleFullscreen') {
-		toggleFullscreen(updatePreviewWrapper);
+		toggleFullscreen();
+		updatePreviewWrapper();
 	} else if (event.data === 'prevSpread') {
 		navigateSpread(-1, updatePreviewWrapper);
 	} else if (event.data === 'nextSpread') {
@@ -104,7 +105,8 @@ async function initializeEditor() {
 	// Exit fullscreen when viewport is too short (matches CSS @media max-height: 200px)
 	window.addEventListener('resize', function() {
 		if (getIsFullscreen() && window.innerHeight <= 200) {
-			toggleFullscreen(updatePreviewWrapper);
+			toggleFullscreen();
+			updatePreviewWrapper();
 		}
 	});
 }

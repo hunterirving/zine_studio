@@ -1,10 +1,63 @@
 import { insertAfterHead } from './html-utils.js';
 import { extractTitleAndFavicon, updateMainPageTitleAndFavicon } from './html-utils.js';
-import { generateSpreadCSS } from './zine-styles.js';
+import { generateSpreadCSS, ZINE_PAGE_CSS, ZINE_FLIP_CSS, ZINE_PRINT_CSS } from './zine-styles.js';
 import { SPREADS } from './constants.js';
 import { getCurrentSpread } from './spread-navigation.js';
 import { isMobileDevice } from './mobile-keyboard.js';
-import { setupSpreadLayout, scaleSpreadToFit } from './spread-layout.js';
+import { setupSpreadLayout, scaleSpreadToFit, navigateToSpread } from './spread-layout.js';
+import { setSpreadImmediate } from './page-flip-animation.js';
+
+// Track if flip mode is enabled
+let flipModeEnabled = true; // Default to enabled
+let previousSpread = 0;
+
+export function setFlipMode(enabled) {
+	flipModeEnabled = enabled;
+}
+
+export function isFlipModeEnabled() {
+	return flipModeEnabled;
+}
+
+// Generate CSS for flip mode
+function generateFlipModeCSS() {
+	return `
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+
+		@media screen {
+			html, body {
+				height: 100% !important;
+				overflow: hidden !important;
+			}
+
+			body {
+				display: flex !important;
+				justify-content: center !important;
+				align-items: center !important;
+			}
+
+			body > *:not(.zine-spread-container):not(.iframe-fullscreen-toggle) {
+				display: none !important;
+			}
+
+			${ZINE_PAGE_CSS}
+			${ZINE_FLIP_CSS}
+
+			.zine-spread-container {
+				display: flex !important;
+				position: relative;
+			}
+
+			.page {
+				display: block !important;
+			}
+		}
+
+		@media print {
+			${ZINE_PRINT_CSS}
+		}
+	`;
+}
 
 export function updatePreview(editorView, isEditorFocused) {
 	const preview = document.getElementById('preview');
@@ -29,7 +82,7 @@ export function updatePreview(editorView, isEditorFocused) {
 
 	// Inject spread CSS right after <head> so user styles come last and take precedence
 	const currentSpread = getCurrentSpread();
-	const spreadCSS = generateSpreadCSS(currentSpread);
+	const spreadCSS = flipModeEnabled ? generateFlipModeCSS() : generateSpreadCSS(currentSpread);
 	const processedCode = insertAfterHead(code, `<style id="zine-editor-spread-css">${spreadCSS}</style>`);
 
 	preview.srcdoc = processedCode || '<!DOCTYPE html><html><head></head><body></body></html>';
@@ -65,13 +118,32 @@ export function updatePreview(editorView, isEditorFocused) {
 				const container = doc.createElement('div');
 				container.className = 'zine-spread-container';
 
-				setupSpreadLayout(container, spread, doc);
-				doc.body.appendChild(container);
+				if (flipModeEnabled) {
+					// Setup flip animation mode
+					setupSpreadLayout(container, spread, doc, true);
+					doc.body.appendChild(container);
 
-				// Scale container to fit viewport
-				const scaleToFit = () => scaleSpreadToFit(container, doc);
-				scaleToFit();
-				doc.defaultView.addEventListener('resize', scaleToFit);
+					// Set initial spread state without animation
+					setTimeout(() => {
+						setSpreadImmediate(currentSpread, doc);
+						const scaleToFit = () => scaleSpreadToFit(container, doc);
+						scaleToFit();
+						doc.defaultView.addEventListener('resize', scaleToFit);
+					}, 0);
+				} else {
+					// Original non-animated mode
+					setupSpreadLayout(container, spread, doc, false);
+					doc.body.appendChild(container);
+
+					// Scale container to fit viewport
+					const scaleToFit = () => scaleSpreadToFit(container, doc);
+					scaleToFit();
+					doc.defaultView.addEventListener('resize', scaleToFit);
+				}
+
+				// Store container and flip mode state for navigation updates
+				doc._zineContainer = container;
+				doc._flipModeEnabled = flipModeEnabled;
 			}
 
 			// Add keyboard listener for navigation and shortcuts

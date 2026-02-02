@@ -41,14 +41,36 @@ export function navigateSpread(delta, updatePreviewCallback) {
 	if (newSpread >= 0 && newSpread < SPREADS.length) {
 		currentSpread = newSpread;
 		updateSpreadIndicator();
-		updatePreviewCallback();
-		// Refocus preview so keyboard navigation continues to work
-		document.getElementById('preview').focus();
+
+		// Try to animate if flip mode is enabled
+		const preview = document.getElementById('preview');
+		try {
+			const doc = preview.contentDocument;
+			const container = doc?._zineContainer;
+			const flipModeEnabled = doc?._flipModeEnabled;
+
+			if (container && flipModeEnabled) {
+				// Dynamic import to avoid circular dependency
+				import('./spread-layout.js').then(({ navigateToSpread }) => {
+					navigateToSpread(container, newSpread, doc, true, () => {
+						// Refocus preview so keyboard navigation continues to work
+						preview.focus();
+					});
+				});
+			} else {
+				updatePreviewCallback();
+				preview.focus();
+			}
+		} catch (e) {
+			// Fallback to regular update
+			updatePreviewCallback();
+			preview.focus();
+		}
 	}
 }
 
 // Fullscreen toggle
-export function toggleFullscreen(updatePreviewCallback) {
+export function toggleFullscreen() {
 	isFullscreen = !isFullscreen;
 	const editorPane = document.querySelector('.editor-pane');
 	const previewPane = document.querySelector('.preview-pane');

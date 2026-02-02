@@ -1,5 +1,5 @@
 import { PAGE_IDS, SPREADS, NAV_HEIGHT, NAV_BUTTON_CSS, NAV_BUTTON_STYLES } from './constants.js';
-import { ZINE_PAGE_CSS, ZINE_PRINT_CSS } from './zine-styles.js';
+import { ZINE_PAGE_CSS, ZINE_PRINT_CSS, ZINE_FLIP_CSS } from './zine-styles.js';
 
 // Generate standalone viewer CSS and JS (matches preview pane rendering)
 export function generateViewerCode() {
@@ -22,6 +22,19 @@ export function generateViewerCode() {
 				display: none !important;
 			}
 			${ZINE_PAGE_CSS}
+			${ZINE_FLIP_CSS}
+
+			/* Dynamic z-index based on leaf state */
+			.zine-leaf[data-state="closed"][data-leaf-index="0"] { z-index: 14 !important; }
+			.zine-leaf[data-state="closed"][data-leaf-index="1"] { z-index: 13 !important; }
+			.zine-leaf[data-state="closed"][data-leaf-index="2"] { z-index: 12 !important; }
+			.zine-leaf[data-state="closed"][data-leaf-index="3"] { z-index: 11 !important; }
+			.zine-leaf[data-state="open"][data-leaf-index="0"] { z-index: 4 !important; }
+			.zine-leaf[data-state="open"][data-leaf-index="1"] { z-index: 3 !important; }
+			.zine-leaf[data-state="open"][data-leaf-index="2"] { z-index: 2 !important; }
+			.zine-leaf[data-state="open"][data-leaf-index="3"] { z-index: 1 !important; }
+			.zine-leaf[data-state="flipping"] { z-index: 20 !important; }
+
 			.zine-spread-container {
 				display: flex !important;
 				position: relative;
@@ -65,25 +78,141 @@ export function generateViewerCode() {
 		const NAV_HEIGHT = ${NAV_HEIGHT};
 		let currentSpread = 0;
 		let container;
+		let isAnimating = false;
+		const USE_FLIP_ANIMATION = true;
+
+		// Page leaf structure (front and back of each physical page)
+		const PAGE_LEAVES = [
+			{ front: 'front-cover', back: 'page1' },
+			{ front: 'page2', back: 'page3' },
+			{ front: 'page4', back: 'page5' },
+			{ front: 'page6', back: 'back-cover' }
+		];
+
+		function easeInOutCubic(t) {
+			return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+		}
 
 		function scaleToFit() {
 			if (!container) return;
+			const bookContainer = container.querySelector('.zine-book') || container;
 			const vw = document.documentElement.clientWidth;
 			const vh = document.documentElement.clientHeight - NAV_HEIGHT;
-			const spreadWidthPx = container.offsetWidth;
-			const spreadHeightPx = container.offsetHeight;
+			const spreadWidthPx = bookContainer.offsetWidth;
+			const spreadHeightPx = bookContainer.offsetHeight;
 			if (spreadWidthPx === 0 || spreadHeightPx === 0) return;
 			const scaleX = (vw - 40) / spreadWidthPx;
 			const scaleY = (vh - 40) / spreadHeightPx;
 			const scale = Math.min(scaleX, scaleY);
-			container.style.transform = 'scale(' + scale + ')';
+			bookContainer.style.transform = 'scale(' + scale + ')';
 		}
 
-		function showSpread(index) {
-			const spread = SPREADS[index];
-			const visible = [spread.left, spread.right].filter(Boolean);
+		function initFlipMode() {
+			const book = document.createElement('div');
+			book.className = 'zine-book';
 
-			// Move existing pages back to body before clearing container
+			// Create all leaves
+			PAGE_LEAVES.forEach((leaf, index) => {
+				const leafEl = document.createElement('div');
+				leafEl.className = 'zine-leaf';
+				leafEl.dataset.leafIndex = index;
+				leafEl.dataset.state = 'closed';
+				leafEl.style.zIndex = String(20 - index); // Initial z-index for closed state
+
+				const frontSide = document.createElement('div');
+				frontSide.className = 'zine-leaf-front';
+				const frontPage = document.getElementById(leaf.front);
+				if (frontPage) frontSide.appendChild(frontPage.cloneNode(true));
+
+				const backSide = document.createElement('div');
+				backSide.className = 'zine-leaf-back';
+				const backPage = document.getElementById(leaf.back);
+				if (backPage) backSide.appendChild(backPage.cloneNode(true));
+
+				leafEl.appendChild(frontSide);
+				leafEl.appendChild(backSide);
+				book.appendChild(leafEl);
+			});
+
+			container.appendChild(book);
+		}
+
+		function animateFlip(fromSpread, toSpread, onComplete) {
+			if (isAnimating) return;
+			isAnimating = true;
+
+			const direction = toSpread > fromSpread ? 'forward' : 'backward';
+			const leaves = document.querySelectorAll('.zine-leaf');
+
+			if (direction === 'forward') {
+				const leafToFlip = leaves[fromSpread];
+				if (leafToFlip) {
+					leafToFlip.dataset.state = 'flipping';
+					leafToFlip.style.zIndex = '100';
+					const startTime = performance.now();
+					const duration = 600;
+
+					function animate(currentTime) {
+						const elapsed = currentTime - startTime;
+						const progress = Math.min(elapsed / duration, 1);
+						const eased = easeInOutCubic(progress);
+						const rotation = eased * -180;
+						leafToFlip.style.transform = 'rotateY(' + rotation + 'deg)';
+
+						if (progress < 1) {
+							requestAnimationFrame(animate);
+						} else {
+							leafToFlip.dataset.state = 'open';
+							leafToFlip.style.zIndex = String(fromSpread + 1);
+							isAnimating = false;
+							if (onComplete) onComplete();
+						}
+					}
+					requestAnimationFrame(animate);
+				}
+			} else {
+				const leafToFlip = leaves[toSpread];
+				if (leafToFlip) {
+					leafToFlip.dataset.state = 'flipping';
+					leafToFlip.style.zIndex = '100';
+					const startTime = performance.now();
+					const duration = 600;
+
+					function animate(currentTime) {
+						const elapsed = currentTime - startTime;
+						const progress = Math.min(elapsed / duration, 1);
+						const eased = easeInOutCubic(progress);
+						const rotation = -180 + (eased * 180);
+						leafToFlip.style.transform = 'rotateY(' + rotation + 'deg)';
+
+						if (progress < 1) {
+							requestAnimationFrame(animate);
+						} else {
+							leafToFlip.dataset.state = 'closed';
+							leafToFlip.style.zIndex = String(20 - toSpread);
+							isAnimating = false;
+							if (onComplete) onComplete();
+						}
+					}
+					requestAnimationFrame(animate);
+				}
+			}
+		}
+
+		function showSpread(index, animated) {
+			const spread = SPREADS[index];
+
+			if (USE_FLIP_ANIMATION && animated && container.querySelector('.zine-book')) {
+				animateFlip(currentSpread, index, () => {
+					document.getElementById('zine-indicator').textContent = spread.label;
+					document.getElementById('zine-prev').disabled = index === 0;
+					document.getElementById('zine-next').disabled = index === SPREADS.length - 1;
+				});
+				return;
+			}
+
+			// Non-animated or initial setup
+			const visible = [spread.left, spread.right].filter(Boolean);
 			PAGE_IDS.forEach(id => {
 				const page = document.getElementById(id);
 				if (page) {
@@ -123,8 +252,9 @@ export function generateViewerCode() {
 		function navigate(delta) {
 			const newIndex = currentSpread + delta;
 			if (newIndex >= 0 && newIndex < SPREADS.length) {
+				const oldSpread = currentSpread;
 				currentSpread = newIndex;
-				showSpread(currentSpread);
+				showSpread(currentSpread, true);
 			}
 		}
 
@@ -179,7 +309,20 @@ export function generateViewerCode() {
 					document.getElementById('zine-prev').addEventListener('click', () => navigate(-1));
 					document.getElementById('zine-next').addEventListener('click', () => navigate(1));
 
-					showSpread(currentSpread);
+					if (USE_FLIP_ANIMATION) {
+						initFlipMode();
+						const leaves = document.querySelectorAll('.zine-leaf');
+						leaves.forEach((leaf, index) => {
+							if (index < currentSpread) {
+								leaf.dataset.state = 'open';
+								leaf.style.transform = 'rotateY(-180deg)';
+								leaf.style.zIndex = String(index + 1);
+							}
+						});
+					} else {
+						showSpread(currentSpread, false);
+					}
+					scaleToFit();
 
 					const blob = new Blob([html], { type: 'text/html' });
 					const url = URL.createObjectURL(blob);
@@ -193,7 +336,16 @@ export function generateViewerCode() {
 
 			window.addEventListener('resize', scaleToFit);
 
-			showSpread(0);
+			// Initialize flip mode
+			if (USE_FLIP_ANIMATION) {
+				initFlipMode();
+				document.getElementById('zine-indicator').textContent = SPREADS[0].label;
+				document.getElementById('zine-prev').disabled = true;
+				document.getElementById('zine-next').disabled = false;
+				scaleToFit();
+			} else {
+				showSpread(0, false);
+			}
 		});
 	`;
 
