@@ -1,0 +1,271 @@
+:root {
+	--text-color: #f8f8f2;
+	--editor-bg: #16181b;
+	scrollbar-color: grey var(--editor-bg);
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+html, body {
+	overscroll-behavior: none;
+	background-color: var(--editor-bg);
+}
+
+html {
+	height: 100%;
+}
+
+body {
+	font-family: monospace;
+	background: var(--editor-bg);
+	color: var(--text-color);
+	height: 100%;
+	display: flex;
+	overflow: hidden;
+}
+
+.editor-pane {
+	width: 50%;
+	height: 100%;
+	position: relative;
+	transition: opacity 0.1s ease-out;
+}
+
+.preview-pane {
+	width: 50%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.preview-pane.fullscreen {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 9999;
+}
+
+.editor-pane.hidden {
+	display: none;
+}
+
+#editor {
+	width: 100%;
+	height: 100%;
+	font-family: monospace;
+	font-size: 21px;
+}
+
+/* CodeMirror styling */
+.cm-editor {
+	width: 100%;
+	height: 100%;
+	background: var(--editor-bg);
+	color: var(--text-color);
+}
+
+.cm-placeholder {
+	color: #666;
+	opacity: 0.6;
+}
+
+.cm-content {
+	padding: 15px;
+	font-size: 21px;
+	line-height: 1.6;
+}
+
+.cm-gutters {
+	font-size: 21px;
+	line-height: 1.6;
+	user-select: none;
+}
+
+.cm-lineNumbers .cm-gutterElement {
+	line-height: 1.6;
+	font-size: 21px;
+}
+
+.ͼ1 .cm-lineNumbers .cm-gutterElement {
+	padding-right: 0;
+	padding-left: 8px;
+}
+
+.cm-focused {
+	outline: none;
+}
+
+.cm-editor .cm-content,
+.cm-editor .cm-line,
+.cm-editor {
+	tab-size: 2 !important;
+	-moz-tab-size: 2 !important;
+}
+
+.cm-editor, .cm-content, .cm-scroller, .cm-scrollElement {
+	overscroll-behavior: none !important;
+}
+
+.cm-search button {
+	display: none !important;
+}
+
+.cm-search {
+	background-color: #16181b;
+}
+
+.cm-search label {
+	display: none !important;
+}
+
+.cm-search input[name="replace"] {
+	display: none !important;
+}
+
+.cm-search input[name="search"] {
+	font-size: 21px !important;
+	width: 100% !important;
+	border-radius: 50px !important;
+	padding-left: 0.8em !important;
+	padding-right: 0.8em !important;
+	padding-bottom: 7px !important;
+}
+
+.cm-panels-bottom {
+	border-radius: 0px !important;
+	border-top: none !important;
+}
+
+/* Preview iframe */
+#preview {
+	flex: 1;
+	width: 100%;
+	border: none;
+	background: linear-gradient(to top, #2a2a2a, #3a3a3a);
+	overflow: hidden;
+}
+
+/* Spread navigation controls */
+.spread-nav {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	padding: 12px 20px;
+	background: #2a2a2a;
+}
+
+.spread-nav button {
+	background: rgba(255, 255, 255, 0.15);
+	color: white;
+	border: none;
+	border-radius: 50%;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	cursor: pointer;
+	font-size: 18px;
+	transition: background-color 0.15s;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.spread-nav button:hover:not(:disabled) {
+	background: rgba(255, 255, 255, 0.25);
+}
+
+.spread-nav button:disabled {
+	opacity: 0.3;
+	cursor: default;
+}
+
+#spreadIndicator {
+	color: white;
+	font-size: 14px;
+	min-width: 100px;
+	text-align: center;
+}
+
+/* Vertical layout for narrow screens */
+@media (max-aspect-ratio: 1/1) {
+	body {
+		flex-direction: column;
+	}
+
+	.editor-pane {
+		width: 100%;
+		height: 50%;
+		order: 2;
+	}
+
+	.preview-pane {
+		width: 100%;
+		height: 50%;
+		order: 1;
+		padding-top: env(safe-area-inset-top);
+	}
+}
+
+
+/* Compact height: fullscreen editor */
+@media (max-height: 200px) {
+	.preview-pane {
+		display: none;
+	}
+
+	.editor-pane {
+		width: 100%;
+	}
+}
+
+/* Mobile: fullscreen editor when keyboard is open */
+@media (pointer: coarse), (pointer: none) {
+	body.mobile-keyboard-open .preview-pane {
+		display: none;
+	}
+
+	body.mobile-keyboard-open .editor-pane {
+		position: fixed;
+		top: calc(var(--visual-viewport-offset-top, 0px));
+		left: 0;
+		width: 100%;
+		height: var(--visual-viewport-height, 100%);
+		max-height: var(--visual-viewport-height, 100%);
+		order: 1;
+		overscroll-behavior: none;
+		overflow: hidden;
+	}
+
+	body.mobile-keyboard-open .editor-pane #editor,
+	body.mobile-keyboard-open .editor-pane .cm-editor {
+		height: 100% !important;
+		max-height: 100% !important;
+	}
+}
+
+/* Print: hide editor UI and let iframe print its content */
+@media print {
+	.editor-pane, .spread-nav {
+		display: none !important;
+	}
+
+	.preview-pane {
+		width: 100% !important;
+		height: 100% !important;
+		position: absolute !important;
+		top: 0 !important;
+		left: 0 !important;
+	}
+
+	#preview {
+		width: 100% !important;
+		height: 100% !important;
+	}
+}

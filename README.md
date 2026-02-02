@@ -50,6 +50,17 @@ if a given zine doesn't come out right on your printer (graphics/text cut off at
 - dream journal
 - manifesto
 
+# Development
+
+## Rebuilding the CodeMirror Bundle
+The editor uses a bundled version of CodeMirror. To rebuild it:
+```bash
+cd vendor
+npm install
+npm run build
+```
+This regenerates `codemirror-bundle.js` in the project root.
+
 # Licenses
 
 ## Project License

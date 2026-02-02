@@ -1,0 +1,19 @@
+{
+	"name": "codemirror-bundle",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "node build.mjs"
+	},
+	"dependencies": {
+		"@codemirror/autocomplete": "^6",
+		"@codemirror/commands": "^6",
+		"@codemirror/lang-html": "^6",
+		"@codemirror/language": "^6",
+		"@codemirror/search": "^6",
+		"@codemirror/state": "^6",
+		"@codemirror/view": "^6",
+		"@fsegurai/codemirror-theme-github-dark": "^6",
+		"esbuild": "^0.24"
+	}
+}
