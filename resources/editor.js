@@ -206,7 +206,6 @@ function generateSpreadCSS(spreadIndex) {
 			}
 
 			body {
-				background: linear-gradient(to top, #2a2a2a, #3a3a3a) !important;
 				display: flex !important;
 				justify-content: center !important;
 				align-items: center !important;
