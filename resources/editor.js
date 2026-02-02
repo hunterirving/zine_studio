@@ -5,6 +5,26 @@ const editorPane = document.querySelector('.editor-pane');
 const previewPane = document.querySelector('.preview-pane');
 const storageKey = 'zine-editor-content';
 
+// Insert content right after <head> tag in HTML string
+function insertAfterHead(html, content) {
+	const headMatch = html.match(/<head[^>]*>/i);
+	if (headMatch) {
+		const insertPos = html.indexOf(headMatch[0]) + headMatch[0].length;
+		return html.slice(0, insertPos) + content + html.slice(insertPos);
+	}
+	return html;
+}
+
+// Insert content right before </head> tag in HTML string
+function insertBeforeHeadClose(html, content) {
+	const headEndMatch = html.match(/<\/head>/i);
+	if (headEndMatch) {
+		const insertPos = html.indexOf(headEndMatch[0]);
+		return html.slice(0, insertPos) + content + html.slice(insertPos);
+	}
+	return html;
+}
+
 // Extract title and favicon from user's HTML
 function extractTitleAndFavicon(htmlCode) {
 	const parser = new DOMParser();
@@ -88,27 +108,63 @@ function getBoilerplateCursorPos(startPos = 0) {
 	return startPos + ZINE_BOILERPLATE.indexOf('<div class="page" id="front-cover">') + 39;
 }
 
+// Zine page dimensions in inches
+const PAGE_WIDTH_IN = 2.75;
+const PAGE_HEIGHT_IN = 4.25;
+const PAGE_PADDING_IN = 0.2;
+
+// All page IDs for selectors
+const PAGE_IDS = ['front-cover', 'page1', 'page2', 'page3', 'page4', 'page5', 'page6', 'back-cover'];
+const ALL_PAGES_SELECTOR = PAGE_IDS.map(id => `#${id}`).join(', ');
+const RIGHT_PAGES_SELECTOR = '#front-cover, #page2, #page4, #page6';
+const LEFT_PAGES_SELECTOR = '#back-cover, #page1, #page3, #page5';
+
+// Create an empty placeholder div for single-page spreads
+function createEmptyPlaceholder(doc) {
+	const empty = doc.createElement('div');
+	empty.className = 'zine-empty';
+	return empty;
+}
+
+// Spread definitions
+const SPREADS = [
+	{ left: null, right: 'front-cover', label: 'Front Cover' },
+	{ left: 'page1', right: 'page2', label: 'Pages 1-2' },
+	{ left: 'page3', right: 'page4', label: 'Pages 3-4' },
+	{ left: 'page5', right: 'page6', label: 'Pages 5-6' },
+	{ left: 'back-cover', right: null, label: 'Back Cover' }
+];
+
+let currentSpread = 0;
+let isFullscreen = false;
+let showLineNumbers = false;
+let enableLineWrapping = false;
+let lineNumbersCompartment;
+let lineWrappingCompartment;
+let isEditorFocused = false;
+let initialViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
 // Shared print CSS for zine layout (used by both editor preview and exported viewer)
 const ZINE_PRINT_CSS = `
 	@page { size: 8.5in 11in portrait; margin: 0; }
 	html, body { width: 8.5in; height: 11in; }
 	body {
 		display: grid !important;
-		grid-template-columns: repeat(4, 2.75in);
-		grid-template-rows: repeat(2, 4.25in);
+		grid-template-columns: repeat(4, ${PAGE_WIDTH_IN}in);
+		grid-template-rows: repeat(2, ${PAGE_HEIGHT_IN}in);
 		transform: rotate(90deg);
 		transform-origin: center center;
 		position: absolute;
-		top: calc(50% - 4.25in);
+		top: calc(50% - ${PAGE_HEIGHT_IN}in);
 		left: calc(50% - 5.5in);
 		width: 11in;
 		height: 8.5in;
 	}
-	#front-cover, #page1, #page2, #page3, #page4, #page5, #page6, #back-cover {
+	${ALL_PAGES_SELECTOR} {
 		display: block !important;
-		width: 2.75in !important;
-		height: 4.25in !important;
-		padding: 0.2in;
+		width: ${PAGE_WIDTH_IN}in !important;
+		height: ${PAGE_HEIGHT_IN}in !important;
+		padding: ${PAGE_PADDING_IN}in;
 		background: white;
 		overflow: hidden;
 		overflow-wrap: break-word;
@@ -129,36 +185,14 @@ const ZINE_PRINT_CSS = `
 	a { color: black; }
 `;
 
-// Spread definitions
-const SPREADS = [
-	{ left: null, right: 'front-cover', label: 'Front Cover' },
-	{ left: 'page1', right: 'page2', label: 'Pages 1-2' },
-	{ left: 'page3', right: 'page4', label: 'Pages 3-4' },
-	{ left: 'page5', right: 'page6', label: 'Pages 5-6' },
-	{ left: 'back-cover', right: null, label: 'Back Cover' }
-];
-
-let currentSpread = 0;
-let isFullscreen = false;
-let showLineNumbers = false;
-let enableLineWrapping = false;
-let lineNumbersCompartment;
-let lineWrappingCompartment;
-let isEditorFocused = false;
-let initialViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-
-// Zine page dimensions in inches
-const PAGE_WIDTH_IN = 2.75;
-const PAGE_HEIGHT_IN = 4.25;
-
 // Shared CSS for zine pages (used by both editor preview and exported viewer)
 const ZINE_PAGE_CSS = `
-	#front-cover, #page1, #page2, #page3, #page4, #page5, #page6, #back-cover {
+	${ALL_PAGES_SELECTOR} {
 		display: none;
 		width: ${PAGE_WIDTH_IN}in;
 		height: ${PAGE_HEIGHT_IN}in;
 		flex-shrink: 0;
-		padding: 0.2in;
+		padding: ${PAGE_PADDING_IN}in;
 		overflow: hidden;
 		overflow-wrap: break-word;
 	}
@@ -169,10 +203,10 @@ const ZINE_PAGE_CSS = `
 		display: flex;
 		transform-origin: center center;
 	}
-	#front-cover, #page2, #page4, #page6 {
+	${RIGHT_PAGES_SELECTOR} {
 		box-shadow: inset 4px 0 1.3px -3px rgba(0, 0, 0, 0.09), inset 8px 0 6px -6px rgba(0, 0, 0, 0.15);
 	}
-	#back-cover, #page1, #page3, #page5 {
+	${LEFT_PAGES_SELECTOR} {
 		box-shadow: inset -4px 0 1.5px -3px rgba(0, 0, 0, 0.09), inset -8px 0 6px -6px rgba(0, 0, 0, 0.15);
 	}
 	.zine-empty {
@@ -222,7 +256,7 @@ function generateSpreadCSS(spreadIndex) {
 				position: relative;
 			}
 
-			#front-cover, #page1, #page2, #page3, #page4, #page5, #page6, #back-cover {
+			${ALL_PAGES_SELECTOR} {
 				display: none !important;
 				width: ${PAGE_WIDTH_IN}in !important;
 				height: ${PAGE_HEIGHT_IN}in !important;
@@ -328,14 +362,7 @@ function updatePreview() {
 
 	// Inject spread CSS right after <head> so user styles come last and take precedence
 	const spreadCSS = generateSpreadCSS(currentSpread);
-	let processedCode = code;
-	const headStartMatch = processedCode.match(/<head[^>]*>/i);
-	if (headStartMatch) {
-		const insertPos = processedCode.indexOf(headStartMatch[0]) + headStartMatch[0].length;
-		processedCode = processedCode.slice(0, insertPos) +
-			`<style id="zine-editor-spread-css">${spreadCSS}</style>` +
-			processedCode.slice(insertPos);
-	}
+	const processedCode = insertAfterHead(code, `<style id="zine-editor-spread-css">${spreadCSS}</style>`);
 
 	preview.srcdoc = processedCode || '<!DOCTYPE html><html><head></head><body></body></html>';
 
@@ -372,9 +399,7 @@ function updatePreview() {
 
 				// Add empty placeholder before right page if no left page
 				if (!spread.left && spread.right) {
-					const empty = doc.createElement('div');
-					empty.className = 'zine-empty';
-					container.appendChild(empty);
+					container.appendChild(createEmptyPlaceholder(doc));
 				}
 
 				// Move visible pages into container
@@ -386,9 +411,7 @@ function updatePreview() {
 
 				// Add empty placeholder after left page if no right page
 				if (spread.left && !spread.right) {
-					const empty = doc.createElement('div');
-					empty.className = 'zine-empty';
-					container.appendChild(empty);
+					container.appendChild(createEmptyPlaceholder(doc));
 				}
 
 				doc.body.appendChild(container);
@@ -526,6 +549,29 @@ function toggleLineWrapping() {
 	});
 }
 
+// Shared navigation button CSS (used by both editor spread-nav and exported viewer zine-nav)
+const NAV_BUTTON_CSS = `
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	padding: 12px 20px;
+`;
+
+const NAV_BUTTON_STYLES = `
+	background: rgba(255,255,255,0.15);
+	color: white;
+	border: none;
+	border-radius: 50%;
+	width: 36px;
+	height: 36px;
+	cursor: pointer;
+	font-size: 18px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+`;
+
 // Generate standalone viewer CSS and JS (matches preview pane rendering)
 function generateViewerCode() {
 	const css = `
@@ -545,65 +591,21 @@ function generateViewerCode() {
 			body > *:not(.zine-spread-container):not(.zine-nav) {
 				display: none !important;
 			}
-			#front-cover, #page1, #page2, #page3, #page4, #page5, #page6, #back-cover {
-				display: none;
-				width: ${PAGE_WIDTH_IN}in !important;
-				height: ${PAGE_HEIGHT_IN}in !important;
-				flex-shrink: 0;
-				padding: 0.2in;
-				overflow: hidden;
-				overflow-wrap: break-word;
-			}
-			.page {
-				background: white;
-			}
+			${ZINE_PAGE_CSS}
 			.zine-spread-container {
 				display: flex !important;
-				transform-origin: center center;
 				position: relative;
-			}
-			#front-cover, #page2, #page4, #page6 {
-				box-shadow: inset 4px 0 1.3px -3px rgba(0, 0, 0, 0.09), inset 8px 0 6px -6px rgba(0, 0, 0, 0.15);
-			}
-			#back-cover, #page1, #page3, #page5 {
-				box-shadow: inset -4px 0 1.5px -3px rgba(0, 0, 0, 0.09), inset -8px 0 6px -6px rgba(0, 0, 0, 0.15);
-			}
-			.zine-empty {
-				width: ${PAGE_WIDTH_IN}in;
-				height: ${PAGE_HEIGHT_IN}in;
-				flex-shrink: 0;
-				border: 1px dashed #666;
-			}
-			.zine-empty:first-child {
-				border-right: none;
-			}
-			.zine-empty:last-child {
-				border-left: none;
 			}
 			.zine-nav {
 				position: fixed;
 				bottom: 0;
 				left: 0;
 				right: 0;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				gap: 16px;
-				padding: 12px 20px;
+				${NAV_BUTTON_CSS}
 				background: transparent;
 			}
 			.zine-nav button {
-				background: rgba(255,255,255,0.15);
-				color: white;
-				border: none;
-				border-radius: 50%;
-				width: 36px;
-				height: 36px;
-				cursor: pointer;
-				font-size: 18px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
+				${NAV_BUTTON_STYLES}
 			}
 			.zine-nav button:hover:not(:disabled) { background: rgba(255,255,255,0.25); }
 			.zine-nav button:disabled { opacity: 0.3; cursor: default; }
@@ -615,14 +617,13 @@ function generateViewerCode() {
 		}
 	`;
 
+	// Serialize SPREADS array for the viewer
+	const spreadsJson = JSON.stringify(SPREADS);
+	const pageIdsJson = JSON.stringify(PAGE_IDS);
+
 	const js = `
-		const SPREADS = [
-			{ left: null, right: 'front-cover', label: 'Front Cover' },
-			{ left: 'page1', right: 'page2', label: 'Pages 1–2' },
-			{ left: 'page3', right: 'page4', label: 'Pages 3–4' },
-			{ left: 'page5', right: 'page6', label: 'Pages 5–6' },
-			{ left: 'back-cover', right: null, label: 'Back Cover' }
-		];
+		const SPREADS = ${spreadsJson};
+		const PAGE_IDS = ${pageIdsJson};
 		let currentSpread = 0;
 		let container;
 
@@ -644,10 +645,12 @@ function generateViewerCode() {
 			const visible = [spread.left, spread.right].filter(Boolean);
 
 			// Move existing pages back to body before clearing container
-			const existingPages = container.querySelectorAll('#front-cover, #page1, #page2, #page3, #page4, #page5, #page6, #back-cover');
-			existingPages.forEach(page => {
-				page.style.display = 'none';
-				document.body.appendChild(page);
+			PAGE_IDS.forEach(id => {
+				const page = document.getElementById(id);
+				if (page) {
+					page.style.display = 'none';
+					document.body.appendChild(page);
+				}
 			});
 
 			container.innerHTML = '';
@@ -718,51 +721,39 @@ function generateViewerCode() {
 }
 
 // File operations
-window.saveFile = function() {
-	const blob = new Blob([editorView.state.doc.toString()], { type: 'text/html' });
+function downloadHtmlFile(content, filename = 'my-zine.html') {
+	const blob = new Blob([content], { type: 'text/html' });
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement('a');
 	a.href = url;
-	a.download = 'my-zine.html';
+	a.download = filename;
 	a.click();
 	URL.revokeObjectURL(url);
+}
+
+window.saveFile = function() {
+	downloadHtmlFile(editorView.state.doc.toString());
 };
 
 window.saveFileWithViewer = function() {
 	const code = editorView.state.doc.toString();
 	const { css, js } = generateViewerCode();
 
-	// Inject viewer CSS at START of head (so user styles take precedence for page content)
-	// Inject viewer JS at END of head (needs to run after DOM is ready)
-	let processedCode = code;
-	const headStartMatch = processedCode.match(/<head[^>]*>/i);
-	const headEndMatch = processedCode.match(/<\/head>/i);
+	// Check if code has proper head tags
+	const hasHead = /<head[^>]*>/i.test(code) && /<\/head>/i.test(code);
 
-	if (headStartMatch && headEndMatch) {
-		// Insert CSS right after <head>
-		const cssInsertPos = processedCode.indexOf(headStartMatch[0]) + headStartMatch[0].length;
-		processedCode = processedCode.slice(0, cssInsertPos) +
-			`\n<style id="zine-viewer-css">${css}</style>` +
-			processedCode.slice(cssInsertPos);
-
-		// Insert JS before </head> (recalculate position after CSS insertion)
-		const newHeadEndMatch = processedCode.match(/<\/head>/i);
-		const jsInsertPos = processedCode.indexOf(newHeadEndMatch[0]);
-		processedCode = processedCode.slice(0, jsInsertPos) +
-			`<script id="zine-viewer-js">${js}<\/script>\n` +
-			processedCode.slice(jsInsertPos);
+	let processedCode;
+	if (hasHead) {
+		// Inject viewer CSS at START of head (so user styles take precedence for page content)
+		// Inject viewer JS at END of head (needs to run after DOM is ready)
+		processedCode = insertAfterHead(code, `\n<style id="zine-viewer-css">${css}</style>`);
+		processedCode = insertBeforeHeadClose(processedCode, `<script id="zine-viewer-js">${js}<\/script>\n`);
 	} else {
 		// No proper head found, wrap content
 		processedCode = `<!DOCTYPE html>\n<html>\n<head>\n<style id="zine-viewer-css">${css}</style>\n<script id="zine-viewer-js">${js}<\/script>\n</head>\n<body>\n${code}\n</body>\n</html>`;
 	}
 
-	const blob = new Blob([processedCode], { type: 'text/html' });
-	const url = URL.createObjectURL(blob);
-	const a = document.createElement('a');
-	a.href = url;
-	a.download = 'my-zine.html';
-	a.click();
-	URL.revokeObjectURL(url);
+	downloadHtmlFile(processedCode);
 };
 
 window.loadFile = function() {
