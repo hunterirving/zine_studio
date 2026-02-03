@@ -31,6 +31,26 @@ window.addEventListener('message', function(event) {
 		window.saveFile();
 	} else if (event.data === 'saveFileWithViewer') {
 		window.saveFileWithViewer();
+	} else if (event.data?.type === 'scaleChange') {
+		// Update background grid size and position to match zine preview
+		const previewPane = document.querySelector('.preview-pane');
+		const preview = document.querySelector('#preview');
+		if (previewPane && preview) {
+			// Get iframe position relative to preview pane
+			const iframeRect = preview.getBoundingClientRect();
+			const paneRect = previewPane.getBoundingClientRect();
+			const iframeOffsetX = iframeRect.left - paneRect.left;
+			const iframeOffsetY = iframeRect.top - paneRect.top;
+
+			// Spread position in pane coordinates
+			const spreadLeft = iframeOffsetX + event.data.spreadLeft;
+			const spreadTop = iframeOffsetY + event.data.spreadTop;
+
+			previewPane.style.setProperty('--grid-width', `${event.data.gridWidth}px`);
+			previewPane.style.setProperty('--grid-height', `${event.data.gridHeight}px`);
+			previewPane.style.setProperty('--spread-left', `${spreadLeft}px`);
+			previewPane.style.setProperty('--spread-top', `${spreadTop}px`);
+		}
 	}
 });
 

@@ -79,4 +79,27 @@ export function scaleSpreadToFit(container, doc, bottomPadding = 0) {
 	const translateX = translateMatch ? translateMatch[0] : '';
 
 	bookContainer.style.transform = translateX ? `scale(${scale}) ${translateX}` : `scale(${scale})`;
+
+	// Notify parent of spread position and grid size for background grid
+	if (doc.defaultView?.parent && doc.defaultView.parent !== doc.defaultView) {
+		const rect = bookContainer.getBoundingClientRect();
+
+		// Derive grid from height (always 1 page tall = 11 cells)
+		// Cell aspect ratio: (2.75/7) / (4.25/11) = 30.25/29.75
+		const gridHeight = rect.height / 11;
+		const gridWidth = gridHeight * (30.25 / 29.75);
+
+		// Remove translateX shift so grid always anchors to the un-shifted book position
+		// The translateX is in inches and gets multiplied by scale
+		const translateInchMatch = translateX.match(/translateX\(([^)]+)in\)/);
+		const translatePx = translateInchMatch ? parseFloat(translateInchMatch[1]) * 96 * scale : 0;
+
+		doc.defaultView.parent.postMessage({
+			type: 'scaleChange',
+			gridWidth,
+			gridHeight,
+			spreadLeft: rect.left - translatePx,
+			spreadTop: rect.top
+		}, '*');
+	}
 }
