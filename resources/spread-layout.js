@@ -78,5 +78,5 @@ export function scaleSpreadToFit(container, doc, bottomPadding = 0) {
 	const translateMatch = currentTransform.match(/translateX\([^)]+\)/);
 	const translateX = translateMatch ? translateMatch[0] : '';
 
-	bookContainer.style.transform = translateX ? `${translateX} scale(${scale})` : `scale(${scale})`;
+	bookContainer.style.transform = translateX ? `scale(${scale}) ${translateX}` : `scale(${scale})`;
 }

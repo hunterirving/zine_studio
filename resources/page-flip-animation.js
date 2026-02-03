@@ -77,11 +77,12 @@ function updateBookPosition(spreadIndex, animated = true) {
 
 	// Spread 0 (front cover): single right page, shift left to center
 	// Spread 4 (back cover): single left page, shift right to center
+	// Half page width = 1.375in
 	let shiftAmount = '0in';
 	if (spreadIndex === 0) {
-		shiftAmount = '-1.375in'; // Shift left by half a page width
+		shiftAmount = '-1.375in';
 	} else if (spreadIndex === 4) {
-		shiftAmount = '1.375in'; // Shift right by half a page width
+		shiftAmount = '1.375in';
 	}
 
 	if (animated) {
@@ -95,7 +96,7 @@ function updateBookPosition(spreadIndex, animated = true) {
 	const scaleMatch = currentTransform.match(/scale\([^)]+\)/);
 	const scale = scaleMatch ? scaleMatch[0] : '';
 
-	bookContainer.style.transform = scale ? `translateX(${shiftAmount}) ${scale}` : `translateX(${shiftAmount})`;
+	bookContainer.style.transform = scale ? `${scale} translateX(${shiftAmount})` : `translateX(${shiftAmount})`;
 
 	// Remove transition after animation completes
 	if (animated) {
