@@ -49,33 +49,33 @@ export const ZINE_BOILERPLATE = `<!DOCTYPE html>
 <html>
 	<head>
 		<style>
-
+\t\t\t
 		</style>
 	</head>
 	<body>
 		<div class="page" id="front-cover">
-
+\t\t\t
 		</div>
 		<div class="page" id="page1">
-
+\t\t\t
 		</div>
 		<div class="page" id="page2">
-
+\t\t\t
 		</div>
 		<div class="page" id="page3">
-
+\t\t\t
 		</div>
 		<div class="page" id="page4">
-
+\t\t\t
 		</div>
 		<div class="page" id="page5">
-
+\t\t\t
 		</div>
 		<div class="page" id="page6">
-
+\t\t\t
 		</div>
 		<div class="page" id="back-cover">
-
+\t\t\t
 		</div>
 	</body>
 </html>

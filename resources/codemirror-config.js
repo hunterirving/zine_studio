@@ -128,7 +128,7 @@ export async function initializeCodeMirror(saveToStorageCallback, updatePreviewC
 			}),
 			githubDark,
 			indentUnit.of("\t"),
-			placeholder("Type \"<!>\" to insert zine outline..."),
+			placeholder("Type <!> to insert zine boilerplate..."),
 			EditorView.updateListener.of((update) => {
 				if (update.docChanged) {
 					const content = update.state.doc.toString();
