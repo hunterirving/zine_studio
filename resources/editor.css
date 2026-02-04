@@ -298,7 +298,7 @@ body {
 
 
 /* Compact height: fullscreen editor */
-@media (max-height: 200px) {
+@media (max-height: 270px) {
 	.preview-pane {
 		display: none;
 	}

@@ -113,7 +113,7 @@ async function initializeEditor() {
 
 	// Exit fullscreen when viewport is too short (matches CSS @media max-height: 200px)
 	window.addEventListener('resize', function() {
-		if (getIsFullscreen() && window.innerHeight <= 200) {
+		if (getIsFullscreen() && window.innerHeight <= 270) {
 			toggleFullscreen();
 			updatePreviewWrapper();
 		}

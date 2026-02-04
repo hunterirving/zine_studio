@@ -1,4 +1,8 @@
-# What if you could hold a website?
+# If you have a printer, you're a publisher
+Use HTML to make print-at-home zines from the comfort of your web browser.
+
+
+
 open ```zine.html``` in your web browser (or <a href="https://hunterirving.github.io/zine.html/zines/zine.html/">click here</a>) then use ```⌘``` + ```P``` to print an 8-page mini zine to one sheet of 8.5 x 11" legal paper.
 
 <a href="https://hunterirving.github.io/zine.html/zines/zine.html/"><img src="resources/readme_images/zine-layout.png"></a>

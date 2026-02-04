@@ -70,7 +70,8 @@ export function scaleSpreadToFit(container, doc, bottomPadding = 0) {
 	const spreadHeightPx = bookContainer.offsetHeight;
 	if (spreadWidthPx === 0 || spreadHeightPx === 0) return;
 	const scaleX = (vw - 40) / spreadWidthPx;
-	const scaleY = (vh - 134) / spreadHeightPx;
+	const verticalPadding = vh <= 630 ? 40 : 130;
+	const scaleY = (vh - verticalPadding) / spreadHeightPx;
 	const scale = Math.min(scaleX, scaleY);
 
 	// Use CSS zoom for high-resolution rendering instead of transform scale
