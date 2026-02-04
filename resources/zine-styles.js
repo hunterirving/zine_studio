@@ -42,6 +42,7 @@ export const ZINE_PRINT_CSS = `
 	.zine-book { display: none !important; }
 	.page { display: block !important; }
 	a { color: black; }
+	img { max-width: 100%; height: auto; }
 `;
 
 // CSS for 3D page flip animation
