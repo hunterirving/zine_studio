@@ -2,7 +2,7 @@ import { saveToStorage } from './storage.js';
 import { setCurrentSpread, updateSpreadIndicator } from './spread-navigation.js';
 
 // File operations
-function downloadHtmlFile(content, filename = 'my-zine.html') {
+function downloadHtmlFile(content, filename = 'zine.html') {
 	const blob = new Blob([content], { type: 'text/html' });
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement('a');
