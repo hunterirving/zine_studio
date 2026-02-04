@@ -8,16 +8,6 @@ export function insertAfterHead(html, content) {
 	return html;
 }
 
-// Insert content right before </head> tag in HTML string
-export function insertBeforeHeadClose(html, content) {
-	const headEndMatch = html.match(/<\/head>/i);
-	if (headEndMatch) {
-		const insertPos = html.indexOf(headEndMatch[0]);
-		return html.slice(0, insertPos) + content + html.slice(insertPos);
-	}
-	return html;
-}
-
 // Extract title and favicon from user's HTML
 export function extractTitleAndFavicon(htmlCode) {
 	const parser = new DOMParser();

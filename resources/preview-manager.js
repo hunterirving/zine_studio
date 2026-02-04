@@ -173,9 +173,6 @@ export function updatePreview(editorView, isEditorFocused) {
 				} else if ((e.metaKey || e.ctrlKey) && e.key === 's') {
 					e.preventDefault();
 					parent.postMessage('saveFile', '*');
-				} else if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
-					e.preventDefault();
-					parent.postMessage('saveFileWithViewer', '*');
 				}
 			});
 

@@ -145,21 +145,18 @@ function processNextFlip() {
 
 	const nextFlip = pendingFlipQueue.shift();
 	// Use current spread index as fromSpread since we're now at a different position
-	executePageFlip(currentSpreadIndex, nextFlip.toSpread, nextFlip.container, nextFlip.doc, nextFlip.onComplete);
+	executePageFlip(currentSpreadIndex, nextFlip.toSpread, nextFlip.doc, nextFlip.onComplete);
 }
 
 // Execute a single page flip (internal function)
-function executePageFlip(fromSpread, toSpread, container, doc, onComplete) {
+function executePageFlip(fromSpread, toSpread, doc, onComplete) {
 	isAnimating = true;
 	currentSpreadIndex = toSpread;
-
-	console.log(`\n=== executePageFlip: ${fromSpread} → ${toSpread} ===`);
 
 	// Update book position synchronously with the flip animation
 	updateBookPosition(toSpread, true);
 
 	const direction = toSpread > fromSpread ? 'forward' : 'backward';
-	console.log(`Direction: ${direction}`);
 	const leaves = doc.querySelectorAll('.zine-leaf');
 
 	if (direction === 'forward') {
@@ -238,25 +235,24 @@ function executePageFlip(fromSpread, toSpread, container, doc, onComplete) {
 }
 
 // Animate page flip with input buffering
-export function animatePageFlip(fromSpread, toSpread, container, doc, onComplete) {
+export function animatePageFlip(fromSpread, toSpread, doc, onComplete) {
 	// If already animating, queue this flip request
 	if (isAnimating) {
 		// Check if there's already a queued flip to the same target - if so, skip this one
 		// This prevents the queue from growing unnecessarily when users spam the same direction
 		const lastQueued = pendingFlipQueue[pendingFlipQueue.length - 1];
 		if (!lastQueued || lastQueued.toSpread !== toSpread) {
-			pendingFlipQueue.push({ fromSpread, toSpread, container, doc, onComplete });
+			pendingFlipQueue.push({ fromSpread, toSpread, doc, onComplete });
 		}
 		return;
 	}
 
 	// Start the flip immediately
-	executePageFlip(fromSpread, toSpread, container, doc, onComplete);
+	executePageFlip(fromSpread, toSpread, doc, onComplete);
 }
 
 // Set current spread without animation (for initial load)
 export function setSpreadImmediate(spreadIndex, doc) {
-	console.log(`\n=== setSpreadImmediate(${spreadIndex}) ===`);
 	currentSpreadIndex = spreadIndex;
 	updateLeafStates(spreadIndex, doc);
 	updateBookPosition(spreadIndex, false);

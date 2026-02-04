@@ -1,5 +1,3 @@
-import { insertAfterHead, insertBeforeHeadClose } from './html-utils.js';
-import { generateViewerCode } from './viewer-generator.js';
 import { saveToStorage } from './storage.js';
 import { setCurrentSpread, updateSpreadIndicator } from './spread-navigation.js';
 
@@ -16,27 +14,6 @@ function downloadHtmlFile(content, filename = 'my-zine.html') {
 
 export function saveFile(getEditorContent) {
 	downloadHtmlFile(getEditorContent());
-}
-
-export function saveFileWithViewer(getEditorContent) {
-	const code = getEditorContent();
-	const { css, js } = generateViewerCode();
-
-	// Check if code has proper head tags
-	const hasHead = /<head[^>]*>/i.test(code) && /<\/head>/i.test(code);
-
-	let processedCode;
-	if (hasHead) {
-		// Inject viewer CSS at START of head (so user styles take precedence for page content)
-		// Inject viewer JS at END of head (needs to run after DOM is ready)
-		processedCode = insertAfterHead(code, `\n<style id="zine-viewer-css">${css}</style>`);
-		processedCode = insertBeforeHeadClose(processedCode, `<script id="zine-viewer-js">${js}<\/script>\n`);
-	} else {
-		// No proper head found, wrap content
-		processedCode = `<!DOCTYPE html>\n<html>\n<head>\n<style id="zine-viewer-css">${css}</style>\n<script id="zine-viewer-js">${js}<\/script>\n</head>\n<body>\n${code}\n</body>\n</html>`;
-	}
-
-	downloadHtmlFile(processedCode);
 }
 
 export function loadFile(editorView, updatePreviewCallback) {

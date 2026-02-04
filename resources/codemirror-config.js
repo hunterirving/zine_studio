@@ -97,7 +97,6 @@ export async function initializeCodeMirror(saveToStorageCallback, updatePreviewC
 				{key: "Mod-Shift-z", run: redo},
 				{key: "Mod-o", run: () => { window.loadFile(); return true; }},
 				{key: "Mod-s", run: () => { window.saveFile(); return true; }},
-				{key: "Mod-e", run: () => { window.saveFileWithViewer(); return true; }},
 				{key: "F1", run: (view) => { toggleLineNumbers(view); return true; }},
 				{key: "F2", run: (view) => { toggleLineWrapping(view); return true; }},
 				indentWithTab,

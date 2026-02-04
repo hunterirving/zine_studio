@@ -1,5 +1,5 @@
 import { saveToStorage } from './storage.js';
-import { saveFile, saveFileWithViewer, loadFile } from './file-operations.js';
+import { saveFile, loadFile } from './file-operations.js';
 import { updatePreview, setupPreviewPane } from './preview-manager.js';
 import { navigateSpread, toggleFullscreen, initializeSpreadNav, getIsFullscreen } from './spread-navigation.js';
 import { initializeCodeMirror } from './codemirror-config.js';
@@ -29,8 +29,6 @@ window.addEventListener('message', function(event) {
 		navigateSpread(1, updatePreviewWrapper);
 	} else if (event.data === 'saveFile') {
 		window.saveFile();
-	} else if (event.data === 'saveFileWithViewer') {
-		window.saveFileWithViewer();
 	} else if (event.data?.type === 'scaleChange') {
 		// Update background grid size and position to match zine preview
 		const previewPane = document.querySelector('.preview-pane');
@@ -58,10 +56,6 @@ window.addEventListener('message', function(event) {
 // Expose file operations to window for keyboard shortcuts
 window.saveFile = function() {
 	saveFile(() => editorView.state.doc.toString());
-};
-
-window.saveFileWithViewer = function() {
-	saveFileWithViewer(() => editorView.state.doc.toString());
 };
 
 window.loadFile = function() {
@@ -95,16 +89,10 @@ async function initializeEditor() {
 	// Keyboard shortcuts (only when editor not focused, since CodeMirror handles its own)
 	document.addEventListener('keydown', function(e) {
 		const {closeSearchPanel, openSearchPanel} = window.CodeMirror;
-		const editorHasFocus = editorView.hasFocus;
 
 		if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
 			e.preventDefault();
 			closeSearchPanel(editorView) || openSearchPanel(editorView);
-		}
-		// Export with viewer (Cmd+E) - only handle when editor not focused
-		if (!editorHasFocus && (e.metaKey || e.ctrlKey) && e.key === 'e') {
-			e.preventDefault();
-			window.saveFileWithViewer();
 		}
 		// Print the iframe content instead of the parent page
 		if ((e.metaKey || e.ctrlKey) && e.key === 'p') {
