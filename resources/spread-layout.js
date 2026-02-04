@@ -79,13 +79,6 @@ export function scaleSpreadToFit(container, doc, bottomPadding = 0) {
 	// Store the current zoom on the book container for use by updateBookPosition
 	bookContainer.dataset.currentZoom = scale;
 
-	// Preserve any existing translateX from book positioning
-	const currentTransform = bookContainer.style.transform || '';
-	const translateMatch = currentTransform.match(/translateX\([^)]+\)/);
-	const translateX = translateMatch ? translateMatch[0] : '';
-
-	bookContainer.style.transform = translateX || '';
-
 	// Notify parent of spread position and grid size for background grid
 	if (doc.defaultView?.parent && doc.defaultView.parent !== doc.defaultView) {
 		const rect = bookContainer.getBoundingClientRect();
@@ -95,16 +88,18 @@ export function scaleSpreadToFit(container, doc, bottomPadding = 0) {
 		const gridHeight = rect.height / 11;
 		const gridWidth = gridHeight * (30.25 / 29.75);
 
-		// Remove translateX shift so grid always anchors to the un-shifted book position
-		// With CSS zoom, translateX values are in the zoomed coordinate space
-		const translateInchMatch = translateX.match(/translateX\(([^)]+)in\)/);
-		const translatePx = translateInchMatch ? parseFloat(translateInchMatch[1]) * 96 * scale : 0;
+		// Remove the net visual shift so grid always anchors to the un-shifted book position
+		// margin-left is doubled to compensate for flex re-centering, so the net visual
+		// shift is half the margin value; getBoundingClientRect already reflects this
+		const marginLeft = bookContainer.style.marginLeft || '0in';
+		const marginMatch = marginLeft.match(/([-.0-9]+)in/);
+		const netShiftPx = marginMatch ? (parseFloat(marginMatch[1]) / 2) * 96 * scale : 0;
 
 		doc.defaultView.parent.postMessage({
 			type: 'scaleChange',
 			gridWidth,
 			gridHeight,
-			spreadLeft: rect.left - translatePx,
+			spreadLeft: rect.left - netShiftPx,
 			spreadTop: rect.top
 		}, '*');
 	}

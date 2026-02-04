@@ -70,58 +70,41 @@ export function initPageFlip(container, doc) {
 	updateBookPosition(0, false);
 }
 
-// Update the book container horizontal position based on spread
-// Spreads 0 and 4 (single pages) should be centered, others at normal position
-function updateBookPosition(spreadIndex, animated = true) {
-	if (!bookContainer) {
-		console.error('updateBookPosition: bookContainer is null!');
-		return;
-	}
-
+// Calculate the shift amount for a given spread
+function getShiftAmountForSpread(spreadIndex) {
 	// Spread 0 (front cover): single right page, shift left to center
 	// Spread 4 (back cover): single left page, shift right to center
-	// Half page width = 1.375in
-	let shiftAmount = '0in';
+	// margin-left is doubled to compensate for flex re-centering, so the net visual
+	// shift is half the margin value (net visual shift = half a page width = 1.375in)
 	if (spreadIndex === 0) {
-		shiftAmount = '-1.375in';
+		return '-2.75in';
 	} else if (spreadIndex === 4) {
-		shiftAmount = '1.375in';
+		return '2.75in';
 	}
+	return '0in';
+}
 
-	const currentTransform = bookContainer.style.transform;
-	const currentTransition = bookContainer.style.transition;
-	console.log(`updateBookPosition(spread=${spreadIndex}, animated=${animated})`);
-	console.log(`  Current transform: "${currentTransform}"`);
-	console.log(`  Current transition: "${currentTransition}"`);
-	console.log(`  Target: translateX(${shiftAmount})`);
+// Update the book container horizontal position based on spread
+// Spreads 0 and 4 (single pages) should be centered, others at normal position
+// Uses margin-left instead of translateX to avoid conflicts with preserve-3d and zoom
+function updateBookPosition(spreadIndex, animated = true) {
+	if (!bookContainer) return;
+
+	const shiftAmount = getShiftAmountForSpread(spreadIndex);
 
 	if (animated) {
-		// Clear any existing transition first to ensure clean state
-		bookContainer.style.transition = '';
-		// Force a reflow
-		bookContainer.offsetHeight;
-
-		// Now set the transition for this animation
-		bookContainer.style.transition = 'transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1.000)';
-		console.log(`  Set transition, will animate in rAF`);
-
-		// Use requestAnimationFrame to set transform (same as leaf flip animation)
-		// This ensures both animations start in the same frame
-		requestAnimationFrame(() => {
-			console.log(`  rAF: Setting transform to translateX(${shiftAmount})`);
-			bookContainer.style.transform = `translateX(${shiftAmount})`;
-		});
+		bookContainer.style.transition = 'margin-left 0.6s cubic-bezier(0.645, 0.045, 0.355, 1.000)';
+		bookContainer.style.marginLeft = shiftAmount;
 
 		// Remove transition after animation completes
 		setTimeout(() => {
 			bookContainer.style.transition = '';
-		}, 600);
+		}, 650);
 	} else {
 		bookContainer.style.transition = 'none';
-		// For non-animated, use explicit translateX or none
-		const newTransform = shiftAmount !== '0in' ? `translateX(${shiftAmount})` : 'translateX(0in)';
-		console.log(`  Non-animated: Setting transform to ${newTransform}`);
-		bookContainer.style.transform = newTransform;
+		bookContainer.style.marginLeft = shiftAmount;
+		bookContainer.offsetHeight;
+		bookContainer.style.transition = '';
 	}
 }
 

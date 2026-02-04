@@ -114,37 +114,27 @@ export function generateViewerCode() {
 
 			// Spread 0 (front cover): single right page, shift left to center
 			// Spread 4 (back cover): single left page, shift right to center
-			// Half page width = 1.375in
+			// Doubled to compensate for flex re-centering (net visual shift = half)
 			let shiftAmount = '0in';
 			if (spreadIndex === 0) {
-				shiftAmount = '-1.375in';
+				shiftAmount = '-2.75in';
 			} else if (spreadIndex === 4) {
-				shiftAmount = '1.375in';
+				shiftAmount = '2.75in';
 			}
 
 			if (animated) {
-				// Clear any existing transition first to ensure clean state
-				bookContainer.style.transition = '';
-				// Force a reflow
-				bookContainer.offsetHeight;
-
-				// Now set the transition for this animation
-				bookContainer.style.transition = 'transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1.000)';
-
-				// Use requestAnimationFrame to set transform (same as leaf flip animation)
-				// This ensures both animations start in the same frame
-				requestAnimationFrame(function() {
-					bookContainer.style.transform = 'translateX(' + shiftAmount + ')';
-				});
+				bookContainer.style.transition = 'margin-left 0.6s cubic-bezier(0.645, 0.045, 0.355, 1.000)';
+				bookContainer.style.marginLeft = shiftAmount;
 
 				// Remove transition after animation completes
 				setTimeout(function() {
 					bookContainer.style.transition = '';
-				}, 600);
+				}, 650);
 			} else {
 				bookContainer.style.transition = 'none';
-				// For non-animated, use explicit translateX
-				bookContainer.style.transform = shiftAmount !== '0in' ? 'translateX(' + shiftAmount + ')' : 'translateX(0in)';
+				bookContainer.style.marginLeft = shiftAmount;
+				bookContainer.offsetHeight;
+				bookContainer.style.transition = '';
 			}
 		}
 
