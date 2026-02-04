@@ -104,7 +104,48 @@ export function generateViewerCode() {
 			const scaleX = (vw - 40) / spreadWidthPx;
 			const scaleY = (vh - 40) / spreadHeightPx;
 			const scale = Math.min(scaleX, scaleY);
-			bookContainer.style.transform = 'scale(' + scale + ')';
+			bookContainer.style.zoom = scale;
+			bookContainer.dataset.currentZoom = scale;
+		}
+
+		function updateBookPosition(spreadIndex, animated) {
+			const bookContainer = container.querySelector('.zine-book');
+			if (!bookContainer) return;
+
+			// Spread 0 (front cover): single right page, shift left to center
+			// Spread 4 (back cover): single left page, shift right to center
+			// Half page width = 1.375in
+			let shiftAmount = '0in';
+			if (spreadIndex === 0) {
+				shiftAmount = '-1.375in';
+			} else if (spreadIndex === 4) {
+				shiftAmount = '1.375in';
+			}
+
+			if (animated) {
+				// Clear any existing transition first to ensure clean state
+				bookContainer.style.transition = '';
+				// Force a reflow
+				bookContainer.offsetHeight;
+
+				// Now set the transition for this animation
+				bookContainer.style.transition = 'transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1.000)';
+
+				// Use requestAnimationFrame to set transform (same as leaf flip animation)
+				// This ensures both animations start in the same frame
+				requestAnimationFrame(function() {
+					bookContainer.style.transform = 'translateX(' + shiftAmount + ')';
+				});
+
+				// Remove transition after animation completes
+				setTimeout(function() {
+					bookContainer.style.transition = '';
+				}, 600);
+			} else {
+				bookContainer.style.transition = 'none';
+				// For non-animated, use explicit translateX
+				bookContainer.style.transform = shiftAmount !== '0in' ? 'translateX(' + shiftAmount + ')' : 'translateX(0in)';
+			}
 		}
 
 		function initFlipMode() {
@@ -140,6 +181,9 @@ export function generateViewerCode() {
 		function animateFlip(fromSpread, toSpread, onComplete) {
 			if (isAnimating) return;
 			isAnimating = true;
+
+			// Update book position synchronously with the flip animation
+			updateBookPosition(toSpread, true);
 
 			const direction = toSpread > fromSpread ? 'forward' : 'backward';
 			const leaves = document.querySelectorAll('.zine-leaf');
@@ -319,10 +363,11 @@ export function generateViewerCode() {
 								leaf.style.zIndex = String(index + 1);
 							}
 						});
+						scaleToFit();
+						updateBookPosition(currentSpread, false);
 					} else {
 						showSpread(currentSpread, false);
 					}
-					scaleToFit();
 
 					const blob = new Blob([html], { type: 'text/html' });
 					const url = URL.createObjectURL(blob);
@@ -334,7 +379,12 @@ export function generateViewerCode() {
 				}
 			});
 
-			window.addEventListener('resize', scaleToFit);
+			window.addEventListener('resize', function() {
+				scaleToFit();
+				if (USE_FLIP_ANIMATION) {
+					updateBookPosition(currentSpread, false);
+				}
+			});
 
 			// Initialize flip mode
 			if (USE_FLIP_ANIMATION) {
@@ -343,6 +393,7 @@ export function generateViewerCode() {
 				document.getElementById('zine-prev').disabled = true;
 				document.getElementById('zine-next').disabled = false;
 				scaleToFit();
+				updateBookPosition(0, false);
 			} else {
 				showSpread(0, false);
 			}

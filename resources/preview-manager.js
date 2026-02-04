@@ -125,10 +125,23 @@ export function updatePreview(editorView, isEditorFocused) {
 
 					// Set initial spread state without animation
 					setTimeout(() => {
+						scaleSpreadToFit(container, doc); // Must call this BEFORE setSpreadImmediate so zoom is set
 						setSpreadImmediate(currentSpread, doc);
-						const scaleToFit = () => scaleSpreadToFit(container, doc);
-						scaleToFit();
-						doc.defaultView.addEventListener('resize', scaleToFit);
+
+						// On resize, update zoom and reposition book
+						const handleResize = () => {
+							scaleSpreadToFit(container, doc);
+							// Get the actual current spread from the leaf states
+							const leaves = doc.querySelectorAll('.zine-leaf');
+							let activeSpread = 0;
+							leaves.forEach((leaf, index) => {
+								if (leaf.dataset.state === 'open') {
+									activeSpread = index + 1;
+								}
+							});
+							setSpreadImmediate(activeSpread, doc);
+						};
+						doc.defaultView.addEventListener('resize', handleResize);
 					}, 0);
 				} else {
 					// Original non-animated mode

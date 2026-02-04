@@ -73,7 +73,10 @@ export function initPageFlip(container, doc) {
 // Update the book container horizontal position based on spread
 // Spreads 0 and 4 (single pages) should be centered, others at normal position
 function updateBookPosition(spreadIndex, animated = true) {
-	if (!bookContainer) return;
+	if (!bookContainer) {
+		console.error('updateBookPosition: bookContainer is null!');
+		return;
+	}
 
 	// Spread 0 (front cover): single right page, shift left to center
 	// Spread 4 (back cover): single left page, shift right to center
@@ -85,24 +88,40 @@ function updateBookPosition(spreadIndex, animated = true) {
 		shiftAmount = '1.375in';
 	}
 
+	const currentTransform = bookContainer.style.transform;
+	const currentTransition = bookContainer.style.transition;
+	console.log(`updateBookPosition(spread=${spreadIndex}, animated=${animated})`);
+	console.log(`  Current transform: "${currentTransform}"`);
+	console.log(`  Current transition: "${currentTransition}"`);
+	console.log(`  Target: translateX(${shiftAmount})`);
+
 	if (animated) {
+		// Clear any existing transition first to ensure clean state
+		bookContainer.style.transition = '';
+		// Force a reflow
+		bookContainer.offsetHeight;
+
+		// Now set the transition for this animation
 		bookContainer.style.transition = 'transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1.000)';
-	} else {
-		bookContainer.style.transition = 'none';
-	}
+		console.log(`  Set transition, will animate in rAF`);
 
-	// Preserve any existing scale from scaleSpreadToFit
-	const currentTransform = bookContainer.style.transform || '';
-	const scaleMatch = currentTransform.match(/scale\([^)]+\)/);
-	const scale = scaleMatch ? scaleMatch[0] : '';
+		// Use requestAnimationFrame to set transform (same as leaf flip animation)
+		// This ensures both animations start in the same frame
+		requestAnimationFrame(() => {
+			console.log(`  rAF: Setting transform to translateX(${shiftAmount})`);
+			bookContainer.style.transform = `translateX(${shiftAmount})`;
+		});
 
-	bookContainer.style.transform = scale ? `${scale} translateX(${shiftAmount})` : `translateX(${shiftAmount})`;
-
-	// Remove transition after animation completes
-	if (animated) {
+		// Remove transition after animation completes
 		setTimeout(() => {
 			bookContainer.style.transition = '';
 		}, 600);
+	} else {
+		bookContainer.style.transition = 'none';
+		// For non-animated, use explicit translateX or none
+		const newTransform = shiftAmount !== '0in' ? `translateX(${shiftAmount})` : 'translateX(0in)';
+		console.log(`  Non-animated: Setting transform to ${newTransform}`);
+		bookContainer.style.transform = newTransform;
 	}
 }
 
@@ -151,10 +170,13 @@ function executePageFlip(fromSpread, toSpread, container, doc, onComplete) {
 	isAnimating = true;
 	currentSpreadIndex = toSpread;
 
+	console.log(`\n=== executePageFlip: ${fromSpread} → ${toSpread} ===`);
+
 	// Update book position synchronously with the flip animation
 	updateBookPosition(toSpread, true);
 
 	const direction = toSpread > fromSpread ? 'forward' : 'backward';
+	console.log(`Direction: ${direction}`);
 	const leaves = doc.querySelectorAll('.zine-leaf');
 
 	if (direction === 'forward') {
@@ -251,6 +273,7 @@ export function animatePageFlip(fromSpread, toSpread, container, doc, onComplete
 
 // Set current spread without animation (for initial load)
 export function setSpreadImmediate(spreadIndex, doc) {
+	console.log(`\n=== setSpreadImmediate(${spreadIndex}) ===`);
 	currentSpreadIndex = spreadIndex;
 	updateLeafStates(spreadIndex, doc);
 	updateBookPosition(spreadIndex, false);

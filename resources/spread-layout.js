@@ -73,12 +73,18 @@ export function scaleSpreadToFit(container, doc, bottomPadding = 0) {
 	const scaleY = (vh - 40) / spreadHeightPx;
 	const scale = Math.min(scaleX, scaleY);
 
+	// Use CSS zoom for high-resolution rendering instead of transform scale
+	bookContainer.style.zoom = scale;
+
+	// Store the current zoom on the book container for use by updateBookPosition
+	bookContainer.dataset.currentZoom = scale;
+
 	// Preserve any existing translateX from book positioning
 	const currentTransform = bookContainer.style.transform || '';
 	const translateMatch = currentTransform.match(/translateX\([^)]+\)/);
 	const translateX = translateMatch ? translateMatch[0] : '';
 
-	bookContainer.style.transform = translateX ? `scale(${scale}) ${translateX}` : `scale(${scale})`;
+	bookContainer.style.transform = translateX || '';
 
 	// Notify parent of spread position and grid size for background grid
 	if (doc.defaultView?.parent && doc.defaultView.parent !== doc.defaultView) {
@@ -90,7 +96,7 @@ export function scaleSpreadToFit(container, doc, bottomPadding = 0) {
 		const gridWidth = gridHeight * (30.25 / 29.75);
 
 		// Remove translateX shift so grid always anchors to the un-shifted book position
-		// The translateX is in inches and gets multiplied by scale
+		// With CSS zoom, translateX values are in the zoomed coordinate space
 		const translateInchMatch = translateX.match(/translateX\(([^)]+)in\)/);
 		const translatePx = translateInchMatch ? parseFloat(translateInchMatch[1]) * 96 * scale : 0;
 
