@@ -1,6 +1,6 @@
 # if you have a printer, you're a publisher
 
-1. open <a href="">zine workshop  ↗</a> in your web browser
+1. open <a href="https://hunterirving.github.io/zine_workshop/">zine workshop  ↗</a> in your web browser
 2. flesh out the pages using HTML
 3. press ```⌘ + P``` to print an 8-page mini zine to one sheet of 8.5 x 11" legal paper
 
