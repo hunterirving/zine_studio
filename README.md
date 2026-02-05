@@ -16,6 +16,7 @@
 
 once you've printed your zine, follow this assembly guide from <a href="https://vabook.org/wp-content/uploads/sites/16/2020/03/Where-Im-From-zine-folding-instructions.pdf">Virginia Center for the Book</a> to cut and fold it to shape:
 
+
 <a href="https://vabook.org/wp-content/uploads/sites/16/2020/03/Where-Im-From-zine-folding-instructions.pdf">
     <img src="resources/readme_images/folding_guide.png">
 </a>
@@ -24,6 +25,7 @@ once you've printed your zine, follow this assembly guide from <a href="https://
 >once assembled, use a gluestick to increase your zine's structural stability (add glue to the back of the purple sections):
 >
 ><img src="resources/readme_images/glue_guide.png">
+
 
 # cool zine ideas:
 - comic book
