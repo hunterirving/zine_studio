@@ -240,7 +240,8 @@ body {
 	padding: 0;
 	cursor: pointer;
 	font-size: 18px;
-	transition: background 0.2s, opacity 0.2s, color 0.2s, box-shadow 0.2s;
+	transition: opacity 0.2s, filter 0.2s;
+	-webkit-tap-highlight-color: transparent;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -252,20 +253,16 @@ body {
 		inset 0 -1px 1px rgba(0, 0, 0, 0.08);
 }
 
-.spread-nav button:hover:not(:disabled) {
-	background:
-		linear-gradient(to bottom, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.2));
+@media (hover: hover) {
+	.spread-nav button:hover:not(:disabled) {
+		opacity: 1;
+		filter: brightness(1.15);
+	}
 }
 
 .spread-nav button:disabled {
-	background:
-		linear-gradient(to bottom, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-	color: rgba(255, 255, 255, 0.3);
+	opacity: 0.25;
 	cursor: default;
-	box-shadow:
-		0 1px 2px rgba(0, 0, 0, 0.15),
-		inset 0 1px 0 rgba(255, 255, 255, 0.06),
-		inset 0 -1px 1px rgba(0, 0, 0, 0.04);
 }
 
 #spreadIndicator {
