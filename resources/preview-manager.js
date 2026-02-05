@@ -6,6 +6,7 @@ import { getCurrentSpread } from './spread-navigation.js';
 import { isMobileDevice } from './mobile-keyboard.js';
 import { setupSpreadLayout, scaleSpreadToFit, navigateToSpread } from './spread-layout.js';
 import { setSpreadImmediate } from './page-flip-animation.js';
+import { generateFontFaceCSS } from './font-registry.js';
 
 // Track if flip mode is enabled
 let flipModeEnabled = true; // Default to enabled
@@ -80,10 +81,11 @@ export function updatePreview(editorView, isEditorFocused) {
 		}
 	} catch (e) {}
 
-	// Inject spread CSS right after <head> so user styles come last and take precedence
+	// Inject font-face declarations and spread CSS right after <head> so user styles come last and take precedence
 	const currentSpread = getCurrentSpread();
 	const spreadCSS = flipModeEnabled ? generateFlipModeCSS() : generateSpreadCSS(currentSpread);
-	const processedCode = insertAfterHead(code, `<style id="zine-editor-spread-css">${spreadCSS}</style>`);
+	const fontCSS = generateFontFaceCSS();
+	const processedCode = insertAfterHead(code, `<style id="zine-editor-fonts">${fontCSS}</style><style id="zine-editor-spread-css">${spreadCSS}</style>`);
 
 	preview.srcdoc = processedCode || '<!DOCTYPE html><html><head></head><body></body></html>';
 

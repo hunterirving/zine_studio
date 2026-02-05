@@ -26,7 +26,55 @@ once you've printed your zine, follow this <a href="https://vabook.org/wp-conten
 
 <img src="resources/readme_images/glue_guide.png" width="600">
 
-# cool zine ideas:
+## built-in fonts
+
+bundled fonts are automatically available. just use `font-family` in your CSS:
+
+```html
+<style>
+  #front-cover { font-family: 'Basteleur Bold'; }
+  #page1 { font-family: 'Baskervville'; font-style: italic; }
+</style>
+```
+
+<details>
+<summary>available font families</summary>
+
+| font-family | variants | license |
+|-------------|----------|---------|
+| `Baskervville` | Regular, Italic, Bold, Bold Italic | [SIL Open Font License](resources/fonts/baskervvile/OFL.txt) |
+| `Baskervville Medium` | Regular, Italic | [SIL Open Font License](resources/fonts/baskervvile/OFL.txt) |
+| `Baskervville SemiBold` | Regular, Italic | [SIL Open Font License](resources/fonts/baskervvile/OFL.txt) |
+| `Basteleur Bold` | Regular | [SIL Open Font License](resources/fonts/basteleur-master/LICENSE.txt) |
+| `Basteleur Moonlight` | Regular | [SIL Open Font License](resources/fonts/basteleur-master/LICENSE.txt) |
+| `CatShop` | Regular | [SIL Open Font License](resources/fonts/CatShop/Open%20Font%20License.txt) |
+| `Cut Me Out` | Regular | [SIL Open Font License](resources/fonts/CutMeOut/Open%20Font%20License.txt) |
+| `Cut Me Out 2` | Regular | [SIL Open Font License](resources/fonts/CutMeOut/Open%20Font%20License.txt) |
+| `Cut Me Out 3` | Regular | [SIL Open Font License](resources/fonts/CutMeOut/Open%20Font%20License.txt) |
+| `Elb-Tunnel` | Regular | [Creative Commons](resources/fonts/ElbtunnelTT/Creative%20Commons%20Lizenz.txt) |
+| `Elb-Tunnel Schatten` | Regular | [Creative Commons](resources/fonts/ElbtunnelTT/Creative%20Commons%20Lizenz.txt) |
+| `Electrolize` | Regular | [SIL Open Font License](resources/fonts/Electrolize/OFL.txt) |
+| `Eureka` | Regular | [SIL Open Font License](resources/fonts/Eureka/Open%20Font%20License.txt) |
+| `Eyechart` | Regular | [SIL Open Font License](resources/fonts/Eyechart/Open%20Font%20License.txt) |
+| `Immermann` | Regular | [SIL Open Font License](resources/fonts/Immermann/Open%20Font%20License.txt) |
+| `Impact Label` | Regular | [Tension Type Free Font License](resources/fonts/impact-label/Tension%20Type%20Font%20License.txt) |
+| `Impact Label Reversed` | Regular | [Tension Type Free Font License](resources/fonts/impact-label/Tension%20Type%20Font%20License.txt) |
+| `Indira K` | Regular | [SIL Open Font License](resources/fonts/Indira_K/OFL.txt) |
+| `Instrument Serif` | Regular, Italic | [SIL Open Font License](resources/fonts/Instrument_Serif/OFL.txt) |
+| `Kanalisirung` | Regular | [SIL Open Font License](resources/fonts/Kanalisirung/OFL.txt) |
+| `Karrik` | Regular, Italic | [SIL Open Font License](resources/fonts/karrik_fonts-main/LICENCE.txt) |
+| `MMX2010` | Regular | [SIL Open Font License](resources/fonts/MMX2010/Open%20Font%20License.txt) |
+| `Mon Hugo` | Regular | [SIL Open Font License](resources/fonts/Mon_Hugo_freefont/FREE%20FONT%20LICENSE.txt) |
+| `Mon Hugo Out` | Regular | [SIL Open Font License](resources/fonts/Mon_Hugo_freefont/FREE%20FONT%20LICENSE.txt) |
+| `Murrx` | Regular | [SIL Open Font License](resources/fonts/Murrx/Open%20Font%20License.txt) |
+| `Neo-castel` | Regular | [OIFL (French OFL)](resources/fonts/N%C3%A9o-castel/Licence.txt) |
+| `Ouest` | Regular | [OIFL (French OFL)](resources/fonts/OUEST/license.txt) |
+| `Resistance` | Regular | [SIL Open Font License](resources/fonts/resistance-generale-master/LICENSE.txt) |
+| `Special Gothic Expanded One` | Regular | [SIL Open Font License](resources/fonts/Special_Gothic_Expanded_One/OFL.txt) |
+
+</details>
+
+## cool zine ideas:
 - comic book
 - recipe book
 - album review
@@ -35,7 +83,7 @@ once you've printed your zine, follow this <a href="https://vabook.org/wp-conten
 - poem collection
 - manifesto
 
-# licenses and acknowledgements
+## licenses and acknowledgements
 
 this project is licensed under the [GNU General Public License v3.0](LICENSE).
 
@@ -43,30 +91,3 @@ this project is licensed under the [GNU General Public License v3.0](LICENSE).
 
 - [CodeMirror 6](https://codemirror.net/)
 - [GitHub Dark Theme for CodeMirror](https://github.com/fsegurai/codemirror-themes)
-
-## font licenses
-
-| font | license |
-|------|---------|
-| Baskervvile | [SIL Open Font License](resources/fonts/baskervvile/OFL.txt) |
-| Basteleur | [SIL Open Font License](resources/fonts/basteleur-master/LICENSE.txt) |
-| CatShop | [SIL Open Font License](resources/fonts/CatShop/Open%20Font%20License.txt) |
-| CutMeOut | [SIL Open Font License](resources/fonts/CutMeOut/Open%20Font%20License.txt) |
-| Electrolize | [SIL Open Font License](resources/fonts/Electrolize/OFL.txt) |
-| ElbtunnelTT | [Creative Commons](resources/fonts/ElbtunnelTT/Creative%20Commons%20Lizenz.txt) |
-| ElbtunnelTT2 | [Creative Commons](resources/fonts/ElbtunnelTT2/Creative%20Commons%20Lizenz.txt) |
-| Eureka | [SIL Open Font License](resources/fonts/Eureka/Open%20Font%20License.txt) |
-| Eyechart | [SIL Open Font License](resources/fonts/Eyechart/Open%20Font%20License.txt) |
-| Immermann | [SIL Open Font License](resources/fonts/Immermann/Open%20Font%20License.txt) |
-| Impact Label | [Tension Type Free Font License](resources/fonts/impact-label/Tension%20Type%20Font%20License.txt) |
-| Indira_K | [SIL Open Font License](resources/fonts/Indira_K/OFL.txt) |
-| Instrument_Serif | [SIL Open Font License](resources/fonts/Instrument_Serif/OFL.txt) |
-| Kanalisirung | [SIL Open Font License](resources/fonts/Kanalisirung/OFL.txt) |
-| Karrik | [SIL Open Font License](resources/fonts/karrik_fonts-main/LICENCE.txt) |
-| MMX2010 | [SIL Open Font License](resources/fonts/MMX2010/Open%20Font%20License.txt) |
-| Mon_Hugo | [SIL Open Font License](resources/fonts/Mon_Hugo_freefont/FREE%20FONT%20LICENSE.txt) |
-| Murrx | [SIL Open Font License](resources/fonts/Murrx/Open%20Font%20License.txt) |
-| Néo-castel | [OIFL (French OFL)](resources/fonts/Néo-castel/Licence.txt) |
-| OUEST | [OIFL (French OFL)](resources/fonts/OUEST/license.txt) |
-| Resistance générale | [SIL Open Font License](resources/fonts/resistance-generale-master/LICENSE.txt) |
-| Special_Gothic_Expanded_One | [SIL Open Font License](resources/fonts/Special_Gothic_Expanded_One/OFL.txt) |
