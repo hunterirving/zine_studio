@@ -1,0 +1,354 @@
+:root {
+	--text-color: #f8f8f2;
+	--editor-bg: #16181b;
+	scrollbar-color: grey var(--editor-bg);
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+html, body {
+	overscroll-behavior: none;
+	background-color: var(--editor-bg);
+}
+
+html {
+	height: 100%;
+}
+
+body {
+	font-family: monospace;
+	background: var(--editor-bg);
+	color: var(--text-color);
+	height: 100%;
+	display: flex;
+	overflow: hidden;
+}
+
+.editor-pane {
+	width: 50%;
+	height: 100%;
+	position: relative;
+	transition: opacity 0.1s ease-out;
+}
+
+.preview-pane {
+	width: 50%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	--grid-width: 33px;
+	--grid-height: 33px;
+	--spread-left: 0px;
+	--spread-top: 0px;
+	background:
+		linear-gradient(to bottom, #1a4d3a, #184534);
+}
+
+.preview-pane.grid-ready {
+	background:
+		linear-gradient(to right, #4a7a6a 1px, transparent 1px),
+		linear-gradient(to bottom, #4a7a6a 1px, transparent 1px),
+		linear-gradient(to bottom, #1a4d3a, #184534);
+	background-size: var(--grid-width) var(--grid-height), var(--grid-width) var(--grid-height), 100% 100%;
+	background-position:
+		calc(var(--spread-left) + var(--grid-width) / 2) var(--spread-top),
+		calc(var(--spread-left) + var(--grid-width) / 2) var(--spread-top),
+		0 0;
+}
+
+.preview-pane.fullscreen {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 9999;
+}
+
+.editor-pane.hidden {
+	display: none;
+}
+
+#editor {
+	width: 100%;
+	height: 100%;
+	font-family: monospace;
+	font-size: 21px;
+	outline: none;
+}
+
+.editor-pane:focus,
+.editor-pane:focus-within {
+	outline: none;
+}
+
+/* CodeMirror styling */
+.cm-editor {
+	width: 100%;
+	height: 100%;
+	background: var(--editor-bg);
+	color: var(--text-color);
+}
+
+.cm-placeholder {
+	color: #666;
+	opacity: 0.6;
+}
+
+.cm-content {
+	padding: 15px;
+	font-size: 21px;
+	line-height: 1.6;
+}
+
+.cm-gutters {
+	font-size: 21px;
+	line-height: 1.6;
+	user-select: none;
+}
+
+.cm-lineNumbers .cm-gutterElement {
+	line-height: 1.6;
+	font-size: 21px;
+}
+
+.ͼ1 .cm-lineNumbers .cm-gutterElement {
+	padding-right: 0;
+	padding-left: 8px;
+}
+
+.cm-focused {
+	outline: none;
+}
+
+/* Remove any focus rings/borders from CodeMirror elements */
+.cm-editor,
+.cm-editor *,
+.cm-editor *:focus,
+.cm-scroller,
+.cm-scroller:focus,
+.cm-content,
+.cm-content:focus {
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+/* Remove any focus indicators from CodeMirror gutters */
+.cm-gutters {
+	border-right: none !important;
+}
+
+/* Hide the selection layer border that can appear on the right edge */
+.cm-selectionLayer {
+	border: none !important;
+}
+
+/* Target the focus ring that appears next to scrollbar */
+.cm-scroller:focus-visible,
+.cm-editor:focus-visible,
+.cm-content:focus-visible {
+	outline: none !important;
+}
+
+/* Ensure no focus styling on any focusable element within editor */
+#editor *:focus {
+	outline: none !important;
+	box-shadow: none !important;
+	border-color: transparent !important;
+}
+
+/* Remove macOS focus ring */
+#editor {
+	-webkit-focus-ring-color: transparent;
+}
+
+#editor *:focus {
+	-webkit-focus-ring-color: transparent;
+}
+
+.cm-editor .cm-content,
+.cm-editor .cm-line,
+.cm-editor {
+	tab-size: 2 !important;
+	-moz-tab-size: 2 !important;
+}
+
+.cm-editor, .cm-content, .cm-scroller, .cm-scrollElement {
+	overscroll-behavior: none !important;
+}
+
+.cm-search button {
+	display: none !important;
+}
+
+.cm-search {
+	background-color: #16181b;
+}
+
+.cm-search label {
+	display: none !important;
+}
+
+.cm-search input[name="replace"] {
+	display: none !important;
+}
+
+.cm-search input[name="search"] {
+	font-size: 21px !important;
+	width: 100% !important;
+	border-radius: 50px !important;
+	padding-left: 0.8em !important;
+	padding-right: 0.8em !important;
+	padding-bottom: 7px !important;
+}
+
+.cm-panels-bottom {
+	border-radius: 0px !important;
+	border-top: none !important;
+}
+
+/* Preview iframe */
+#preview {
+	flex: 1;
+	width: 100%;
+	border: none;
+	overflow: hidden;
+}
+
+/* Spread navigation controls */
+.spread-nav {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 12px 20px;
+}
+
+.spread-nav button {
+	background:
+		linear-gradient(to bottom, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.15));
+	color: white;
+	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+	border: none;
+	border-radius: 50%;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	cursor: pointer;
+	font-size: 18px;
+	transition: background 0.2s, opacity 0.2s, color 0.2s, box-shadow 0.2s;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	box-shadow:
+		0 1px 3px rgba(0, 0, 0, 0.3),
+		inset 0 1px 0 rgba(255, 255, 255, 0.15),
+		inset 0 -1px 1px rgba(0, 0, 0, 0.08);
+}
+
+.spread-nav button:hover:not(:disabled) {
+	background:
+		linear-gradient(to bottom, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.2));
+}
+
+.spread-nav button:disabled {
+	background:
+		linear-gradient(to bottom, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+	color: rgba(255, 255, 255, 0.3);
+	cursor: default;
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.15),
+		inset 0 1px 0 rgba(255, 255, 255, 0.06),
+		inset 0 -1px 1px rgba(0, 0, 0, 0.04);
+}
+
+#spreadIndicator {
+	color: white;
+	font-size: 16px;
+	min-width: 110px;
+	text-align: center;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Vertical layout for narrow screens */
+@media (max-aspect-ratio: 1/1) {
+	body {
+		flex-direction: column;
+	}
+
+	.editor-pane {
+		width: 100%;
+		height: 50%;
+		order: 2;
+	}
+
+	.preview-pane {
+		width: 100%;
+		height: 50%;
+		order: 1;
+		padding-top: env(safe-area-inset-top);
+	}
+}
+
+
+/* Compact height: fullscreen editor */
+@media (max-height: 270px) {
+	.preview-pane {
+		display: none;
+	}
+
+	.editor-pane {
+		width: 100%;
+	}
+}
+
+/* Mobile: fullscreen editor when keyboard is open */
+@media (pointer: coarse), (pointer: none) {
+	body.mobile-keyboard-open .preview-pane {
+		display: none;
+	}
+
+	body.mobile-keyboard-open .editor-pane {
+		position: fixed;
+		top: calc(var(--visual-viewport-offset-top, 0px));
+		left: 0;
+		width: 100%;
+		height: var(--visual-viewport-height, 100%);
+		max-height: var(--visual-viewport-height, 100%);
+		order: 1;
+		overscroll-behavior: none;
+		overflow: hidden;
+	}
+
+	body.mobile-keyboard-open .editor-pane #editor,
+	body.mobile-keyboard-open .editor-pane .cm-editor {
+		height: 100% !important;
+		max-height: 100% !important;
+	}
+}
+
+/* Print: hide editor UI and let iframe print its content */
+@media print {
+	.editor-pane, .spread-nav {
+		display: none !important;
+	}
+
+	.preview-pane {
+		width: 100% !important;
+		height: 100% !important;
+		position: absolute !important;
+		top: 0 !important;
+		left: 0 !important;
+	}
+
+	#preview {
+		width: 100% !important;
+		height: 100% !important;
+	}
+}

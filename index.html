@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+	<title>zine workshop</title>
+	<link rel="stylesheet" href="resources/editor.css">
+	<script type="module">
+		import {EditorView, keymap, placeholder, lineNumbers, Decoration, EditorState, Compartment, defaultKeymap, indentWithTab, undo, redo, undoDepth, redoDepth, history, historyKeymap, closeBrackets, closeBracketsKeymap, html, githubDark, indentUnit, search, searchKeymap, closeSearchPanel, openSearchPanel} from "./resources/codemirror-bundle.js"
+		window.CodeMirror = {EditorView, EditorState, Compartment, keymap, defaultKeymap, indentWithTab, html, githubDark, indentUnit, placeholder, undo, redo, undoDepth, redoDepth, history, historyKeymap, closeBrackets, closeBracketsKeymap, search, searchKeymap, closeSearchPanel, openSearchPanel, lineNumbers, Decoration};
+	</script>
+</head>
+<body>
+	<div class="editor-pane">
+		<div id="editor"></div>
+	</div>
+	<div class="preview-pane">
+		<iframe id="preview"></iframe>
+		<div class="spread-nav">
+			<button id="prevSpread" title="Previous spread" disabled>&larr;</button>
+			<span id="spreadIndicator">Cover</span>
+			<button id="nextSpread" title="Next spread">&rarr;</button>
+		</div>
+	</div>
+	<script type="module" src="resources/editor.js"></script>
+</body>
+</html>
