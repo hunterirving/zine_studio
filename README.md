@@ -1,14 +1,14 @@
 # if you have a printer, you're a publisher
 
-<a href="https://hunterirving.github.io/zine_workshop/"><img src="resources/readme_images/screenshot.jpg" width="600"></a>
+<a href="https://hunterirving.github.io/zine_studio/"><img src="resources/readme_images/screenshot.jpg" width="600"></a>
 
-#### 1. open <a href="https://hunterirving.github.io/zine_workshop/">zine workshop ↗</a> in your web browser
+#### 1. open <a href="https://hunterirving.github.io/zine_studio/">zine studio ↗</a> in your web browser
 #### 2. use HTML to flesh out the pages
 #### 3. press ```⌘ + P``` to print an 8-page mini zine to one sheet of 8.5 x 11" legal paper
 
 <br>
 
-<a href="https://hunterirving.github.io/zine_workshop/"><img src="resources/readme_images/zines.jpeg" width="600"></a>
+<a href="https://hunterirving.github.io/zine_studio/"><img src="resources/readme_images/zines.jpeg" width="600"></a>
 
 >[!NOTE]
 >for best results, in your system print dialog...
