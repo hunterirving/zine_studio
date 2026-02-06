@@ -3,6 +3,7 @@ import { saveFile, loadFile } from './file-operations.js';
 import { updatePreview, setupPreviewPane } from './preview-manager.js';
 import { navigateSpread, toggleFullscreen, initializeSpreadNav, getIsFullscreen } from './spread-navigation.js';
 import { initializeCodeMirror } from './codemirror-config.js';
+import { preloadAllFonts } from './font-registry.js';
 import { isMobileDevice, exitMobileKeyboardMode, initializeMobileKeyboard } from './mobile-keyboard.js';
 
 // Global state
@@ -122,3 +123,6 @@ async function initializeEditor() {
 
 // Initialize
 initializeEditor();
+
+// Preload fonts in the background so they're ready when needed
+preloadAllFonts();

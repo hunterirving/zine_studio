@@ -69,3 +69,15 @@ export function generateFontFaceCSS() {
 export function getAvailableFontFamilies() {
 	return [...new Set(FONT_ENTRIES.map(e => e.family))];
 }
+
+// Preload all fonts so they're immediately available when used
+export function preloadAllFonts() {
+	for (const entry of FONT_ENTRIES) {
+		const src = formatForCSS(entry.file);
+		const font = new FontFace(entry.family, src, {
+			weight: String(entry.weight),
+			style: entry.style,
+		});
+		font.load().then(loaded => document.fonts.add(loaded)).catch(() => {});
+	}
+}
